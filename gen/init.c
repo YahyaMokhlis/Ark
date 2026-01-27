@@ -20,6 +20,8 @@
 #include "ark/userspacebuf.h"
 #include "ark/script.h"
 #include "ark/time.h"
+#include "ark/pci.h"
+#include "ark/init_api.h"
 #include "../mp/built-in.h"
 
 extern void show_sysinfo_bios(void);
@@ -43,6 +45,10 @@ u8 fs_has_init(void);
 void fs_mount_root(void);
 void input_init(void);  /* Input subsystem manager */
 void input_poll(void);  /* Poll input devices */
+void scanAll(void); /*this is for the pci devices*/
+
+/* Kernel API table is provided by gen/init_api.c */
+
 
 /**
  * Read and display any output from userspace buffer
@@ -90,7 +96,7 @@ void kernel_main(void) {
     
     /* Initialize IDT for int 0x80 syscalls */
     idt_init();
-    
+    scanAll();
     
     printk("[    0.000001] Boot params: stub (no cmdline yet)\n");
     printk("[    0.000010] Framebuffer: initialized\n");
@@ -206,15 +212,15 @@ void kernel_main(void) {
             g_uspace_buffer.write_pos = 0;
             g_uspace_buffer.activity_flag = 0;
             
-            /* Execute the ELF binary */
-            int exit_code = elf_execute(init_data, init_size);
+            /* Execute the ELF binary (init.bin expects an API table) */
+            int exit_code = elf_execute(init_data, init_size, ark_kernel_api());
             
             /* Check if shell loop ran  */
             if (g_uspace_buffer.activity_flag || g_uspace_buffer.write_pos > 0) {
-                printk("[Shell] Shell executed and wrote output\n");
+                printk("[userspace] userspace executed and wrote output\n");
                 print_userspace_output();
             } else {
-                printk("[Shell] Shell executed successfully (no output capability yet)\n");
+                printk("[userspace] userspace executed successfully (no output capability yet)\n");
             }
             
             printk("\n");
@@ -269,4 +275,3 @@ u8 fs_has_init(void) {
 void fs_mount_root(void) {
     ramfs_mount();
 }
-
