@@ -98,7 +98,7 @@ static bool vesa_set_mode_bios(u16 mode) {
  * vesa_init() - Initialize VESA framebuffer
  * 
  * OPTION 1 (preferred): Get framebuffer address from multiboot
- * If your bootloader (GRUB) passed multiboot info with framebuffer fields:
+ * If  bootloader (GRUB) passed multiboot info with framebuffer fields:
  *   - framebuffer_addr (physical address)
  *   - framebuffer_pitch, width, height, bpp
  * 
@@ -341,4 +341,5 @@ void vesa_test_pattern(void) {
     vesa_draw_line(0, vesa_height-1, 0, 0, 0xFFFFFF);
 
     printk("[VESA] Test pattern drawn\n");
+
 }
